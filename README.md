@@ -1,7 +1,6 @@
 # 黄瓜解析器（astrbot_plugin_cucumber_parser）
 
-[![Stars](https://img.shields.io/github/stars/AkinoSa/astrbot_plugin_cucumber_parser?style=flat-square&color=blue)](https://github.com/AkinoSa/astrbot_plugin_cucumber_parser/stargazers)
-[![Views](https://komarev.com/ghpvc/?username=AkinoSa&label=%E8%AE%BF%E9%97%AE%E9%87%8F&color=0e75b6&style=flat)](https://github.com/AkinoSa)
+[![Moe Counter](https://count.getloli.com/get/@AkinoSa?theme=moebooru)](https://github.com/AkinoSa/astrbot_plugin_cucumber_parser)
 
 自动识别消息中的平台链接并解析输出，支持纯文本链接与 QQ 分享卡片。
 
