@@ -1,0 +1,61 @@
+# 黄瓜解析器（astrbot_plugin_cucumber_parser）
+
+[![Stars](https://img.shields.io/github/stars/AkinoSa/astrbot_plugin_cucumber_parser?style=flat-square&color=blue)](https://github.com/AkinoSa/astrbot_plugin_cucumber_parser/stargazers)
+[![Views](https://komarev.com/ghpvc/?username=AkinoSa&label=%E8%AE%BF%E9%97%AE%E9%87%8F&color=0e75b6&style=flat)](https://github.com/AkinoSa)
+
+自动识别消息中的平台链接并解析输出，支持纯文本链接与 QQ 分享卡片。
+
+## 支持平台与类型
+
+| 平台 | 支持类型 |
+|---|---|
+| 抖音 | 视频、图集（视频可直链发送） |
+| B 站 | 视频、番剧、直播、专栏、动态 |
+| 小红书 | 图文笔记、视频笔记 |
+| 贴吧 | 帖子（正文、图片、视频） |
+| 微博 | 微博正文、图片、视频 |
+| 微信 | 公众号文章 |
+| 小黑盒 | 社区帖子 |
+| 知乎 | 问题、回答、专栏文章、想法 |
+
+## 测试环境
+
+- AstrBot v4.29.0
+- 消息平台：QQ（aiocqhttp / OneBot v11）
+
+其它平台未做验证，微信类平台建议关闭「打包为消息集合」。
+
+## 安装
+
+1. 复制本文件夹到 `AstrBot/data/plugins/astrbot_plugin_cucumber_parser/`
+2. WebUI → 插件管理 → 重载 / 重启 AstrBot
+3. 若已安装同类的抖音解析、B 站解析插件，请停用，避免重复解析
+
+依赖会随插件加载自动安装：`aiohttp`、`Pillow`、`pillow-heif`。
+想避免每次加载等待可提前执行：
+```
+pip install aiohttp Pillow pillow-heif
+```
+
+## 使用
+
+- 自动解析：开启「自动解析链接」后自动识别聊天中的链接
+- 手动解析：关闭自动解析时发送 `链接解析 [链接]` / `抖音解析 [链接]` / `b站解析 [链接]`
+
+## 新增平台
+
+在 `parsers/` 下新建 `<平台名>.py`，继承 `BaseParser` 实现 `extract_links`
+与 `fetch`，再到 `parsers/__init__.py` 中注册即可；基类已内置
+QQ 分享卡片链接提取、图片下载转码、文本拼装等通用能力。
+
+## 配置项
+
+| 分组 | 说明 |
+|---|---|
+| 通用设置 | 自动解析、群聊启用、私聊启用、打包为消息集合、防抖秒数（默认 300 秒）、解析后阻断 LLM、写入 LLM 会话（含「仅文字 / 文字+图片」）、消息集合发送者名字（留空取机器人昵称） |
+| 文本显示 | 正文显示方式（裁剪 / 完整）、正文字数上限、各平台正文显示方式（跟随全局 / 裁剪 / 完整）、显示类别（标题 / 作者 / 发布时间 / 互动数据 / 链接 / 正文） |
+| 启用平台 | 各平台开关 |
+| 图片与视频 | 图片长边上限、转码质量、各平台显示封面 / 图片开关（抖音为图集图片与视频封面）、各平台发送视频开关（抖音仅视频作品） |
+| Cookies 配置 | 小红书 / 贴吧 / 微博 / 小黑盒 / 知乎，均选填 |
+
+多数平台可匿名解析；遇到风控或需要登录的内容时再填写对应 Cookie。

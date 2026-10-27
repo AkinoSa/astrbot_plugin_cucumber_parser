@@ -1,0 +1,460 @@
+{
+  "general": {
+    "description": "通用设置",
+    "type": "object",
+    "hint": "解析触发方式与消息发送方式。",
+    "items": {
+      "is_auto_parse": {
+        "description": "自动解析链接",
+        "type": "bool",
+        "default": true,
+        "hint": "关闭后需手动发送「链接解析 + 链接」。"
+      },
+      "is_auto_pack": {
+        "description": "打包为消息集合",
+        "type": "bool",
+        "default": true,
+        "hint": "图集的文本与图片会拆成平级节点；微信平台请关闭。"
+      },
+      "enable_group": {
+        "description": "群聊启用",
+        "type": "bool",
+        "default": true,
+        "hint": "关闭后不在群聊中解析链接。"
+      },
+      "enable_private": {
+        "description": "私聊启用",
+        "type": "bool",
+        "default": true,
+        "hint": "关闭后不在私聊中解析链接。"
+      },
+      "block_after_parse": {
+        "description": "解析后阻断 LLM",
+        "type": "bool",
+        "default": true,
+        "hint": "解析成功后不再把这条消息交给大模型，避免解析完又多一条 AI 回复。"
+      },
+      "enable_conversation_history": {
+        "description": "写入 LLM 会话",
+        "type": "bool",
+        "default": false,
+        "hint": "开启后把解析结果写入当前会话，之后问 bot「刚才发的什么视频」它才答得上来。"
+      },
+      "conversation_history_mode": {
+        "description": "会话记录内容",
+        "type": "string",
+        "default": "text_only",
+        "options": [
+          "text_only",
+          "text_and_images"
+        ],
+        "labels": [
+          "仅保存文字",
+          "保存文字和图片"
+        ],
+        "hint": "仅在开启写入 LLM 会话后生效；图片模式会占用更多存储空间与模型上下文。"
+      },
+      "dedupe_seconds": {
+        "description": "防抖秒数",
+        "type": "int",
+        "default": 300,
+        "hint": "同一群 / 同一会话内，相同链接在该秒数内不重复解析；填 0 表示不限制。"
+      },
+      "node_sender_name": {
+        "description": "消息集合发送者名字",
+        "type": "string",
+        "default": "",
+        "hint": "留空时自动使用机器人昵称 / 群名片（QQ 平台）。"
+      }
+    }
+  },
+  "platform_switches": {
+    "description": "启用平台",
+    "type": "object",
+    "hint": "按需开启或关闭各平台的链接解析。",
+    "items": {
+      "douyin": {
+        "description": "抖音",
+        "type": "bool",
+        "default": true,
+        "hint": "解析视频与图集。"
+      },
+      "bilibili": {
+        "description": "Bilibili",
+        "type": "bool",
+        "default": true,
+        "hint": "解析视频、动态、专栏、直播、番剧。"
+      },
+      "redbook": {
+        "description": "小红书",
+        "type": "bool",
+        "default": true,
+        "hint": "解析图文与视频笔记。"
+      },
+      "tieba": {
+        "description": "贴吧",
+        "type": "bool",
+        "default": true,
+        "hint": "解析帖子正文、图片与视频。"
+      },
+      "weibo": {
+        "description": "微博",
+        "type": "bool",
+        "default": true,
+        "hint": "解析微博正文、图片与视频。"
+      },
+      "wechat": {
+        "description": "微信",
+        "type": "bool",
+        "default": true,
+        "hint": "解析公众号文章。"
+      },
+      "xiaoheihe": {
+        "description": "小黑盒",
+        "type": "bool",
+        "default": true,
+        "hint": "解析社区帖子。"
+      },
+      "zhihu": {
+        "description": "知乎",
+        "type": "bool",
+        "default": true,
+        "hint": "解析问题、回答、专栏文章与想法。"
+      }
+    }
+  },
+  "display": {
+    "description": "文本显示",
+    "type": "object",
+    "hint": "控制解析结果正文长度与显示哪些类别。",
+    "items": {
+      "body_mode": {
+        "description": "正文显示方式",
+        "type": "string",
+        "default": "clip",
+        "options": [
+          "clip",
+          "full"
+        ],
+        "labels": [
+          "裁剪",
+          "完整"
+        ],
+        "hint": "裁剪：按下方字数上限截断并保留换行；完整：输出全部正文。"
+      },
+      "body_limit": {
+        "description": "正文字数上限",
+        "type": "int",
+        "default": 800,
+        "hint": "仅在「裁剪」时生效，按行裁剪不会截断在句子中间。"
+      },
+      "platform_body_mode": {
+        "description": "各平台正文显示方式",
+        "type": "object",
+        "hint": "为单个平台单独指定，选择「跟随全局」时使用上方设置。",
+        "items": {
+          "douyin": {
+            "description": "抖音",
+            "type": "string",
+            "default": "",
+            "options": [
+              "",
+              "clip",
+              "full"
+            ],
+            "labels": [
+              "跟随全局",
+              "裁剪",
+              "完整"
+            ]
+          },
+          "bilibili": {
+            "description": "Bilibili",
+            "type": "string",
+            "default": "",
+            "options": [
+              "",
+              "clip",
+              "full"
+            ],
+            "labels": [
+              "跟随全局",
+              "裁剪",
+              "完整"
+            ]
+          },
+          "redbook": {
+            "description": "小红书",
+            "type": "string",
+            "default": "",
+            "options": [
+              "",
+              "clip",
+              "full"
+            ],
+            "labels": [
+              "跟随全局",
+              "裁剪",
+              "完整"
+            ]
+          },
+          "tieba": {
+            "description": "贴吧",
+            "type": "string",
+            "default": "",
+            "options": [
+              "",
+              "clip",
+              "full"
+            ],
+            "labels": [
+              "跟随全局",
+              "裁剪",
+              "完整"
+            ]
+          },
+          "weibo": {
+            "description": "微博",
+            "type": "string",
+            "default": "",
+            "options": [
+              "",
+              "clip",
+              "full"
+            ],
+            "labels": [
+              "跟随全局",
+              "裁剪",
+              "完整"
+            ]
+          },
+          "wechat": {
+            "description": "微信",
+            "type": "string",
+            "default": "",
+            "options": [
+              "",
+              "clip",
+              "full"
+            ],
+            "labels": [
+              "跟随全局",
+              "裁剪",
+              "完整"
+            ]
+          },
+          "xiaoheihe": {
+            "description": "小黑盒",
+            "type": "string",
+            "default": "",
+            "options": [
+              "",
+              "clip",
+              "full"
+            ],
+            "labels": [
+              "跟随全局",
+              "裁剪",
+              "完整"
+            ]
+          },
+          "zhihu": {
+            "description": "知乎",
+            "type": "string",
+            "default": "",
+            "options": [
+              "",
+              "clip",
+              "full"
+            ],
+            "labels": [
+              "跟随全局",
+              "裁剪",
+              "完整"
+            ]
+          }
+        }
+      },
+      "fields": {
+        "description": "显示类别",
+        "type": "object",
+        "hint": "关闭的类别不会出现在解析结果里。",
+        "items": {
+          "title": {
+            "description": "标题",
+            "type": "bool",
+            "default": true
+          },
+          "author": {
+            "description": "作者",
+            "type": "bool",
+            "default": true
+          },
+          "publish_time": {
+            "description": "发布时间",
+            "type": "bool",
+            "default": true
+          },
+          "statistics": {
+            "description": "互动数据",
+            "type": "bool",
+            "default": true,
+            "hint": "点赞 / 评论 / 收藏 / 转发，平台没有的类别不会显示。"
+          },
+          "link": {
+            "description": "链接",
+            "type": "bool",
+            "default": true
+          },
+          "body": {
+            "description": "正文",
+            "type": "bool",
+            "default": true
+          }
+        }
+      }
+    }
+  },
+  "media": {
+    "description": "图片与视频",
+    "type": "object",
+    "hint": "控制图片压缩与封面显示。",
+    "items": {
+      "image_max_side": {
+        "description": "图片长边最大像素",
+        "type": "int",
+        "default": 1440,
+        "hint": "抖音、贴吧、微博、微信等需要下载转码的图片会被压缩到该尺寸。"
+      },
+      "image_quality": {
+        "description": "图片转码质量",
+        "type": "int",
+        "default": 85,
+        "hint": "取值范围 1～100，数值越大越清晰但体积越大。"
+      },
+      "video_switches": {
+        "description": "各平台发送视频",
+        "type": "object",
+        "hint": "关闭后该平台只输出文字与图片，不再发送视频。",
+        "items": {
+          "douyin": {
+            "description": "抖音",
+            "type": "bool",
+            "default": true,
+            "hint": "仅对视频作品生效，图集作品不发送视频。"
+          },
+          "bilibili": {
+            "description": "Bilibili",
+            "type": "bool",
+            "default": true
+          },
+          "redbook": {
+            "description": "小红书",
+            "type": "bool",
+            "default": true
+          },
+          "tieba": {
+            "description": "贴吧",
+            "type": "bool",
+            "default": true
+          },
+          "weibo": {
+            "description": "微博",
+            "type": "bool",
+            "default": true
+          },
+          "xiaoheihe": {
+            "description": "小黑盒",
+            "type": "bool",
+            "default": true
+          }
+        }
+      },
+      "image_switches": {
+        "description": "各平台显示封面 / 图片",
+        "type": "object",
+        "hint": "关闭后该平台只输出文字，不再发送封面或图片。",
+        "items": {
+          "douyin": {
+            "description": "抖音",
+            "type": "bool",
+            "default": true,
+            "hint": "图集图片与视频封面。"
+          },
+          "bilibili": {
+            "description": "Bilibili",
+            "type": "bool",
+            "default": true
+          },
+          "redbook": {
+            "description": "小红书",
+            "type": "bool",
+            "default": true
+          },
+          "tieba": {
+            "description": "贴吧",
+            "type": "bool",
+            "default": true
+          },
+          "weibo": {
+            "description": "微博",
+            "type": "bool",
+            "default": true
+          },
+          "wechat": {
+            "description": "微信",
+            "type": "bool",
+            "default": true
+          },
+          "xiaoheihe": {
+            "description": "小黑盒",
+            "type": "bool",
+            "default": true
+          },
+          "zhihu": {
+            "description": "知乎",
+            "type": "bool",
+            "default": true
+          }
+        }
+      }
+    }
+  },
+  "cookies": {
+    "description": "Cookies 配置（选填）",
+    "type": "object",
+    "hint": "多数平台无需填写；遇到风控或需要登录态的内容时按需填写，请勿泄露。",
+    "items": {
+      "redbook_cookies": {
+        "description": "小红书 Cookies",
+        "type": "text",
+        "default": "",
+        "hint": "选填，遇到安全验证时填写。"
+      },
+      "tieba_cookies": {
+        "description": "贴吧 Cookies",
+        "type": "text",
+        "default": "",
+        "hint": "选填，用于访问需要登录的贴吧。"
+      },
+      "weibo_cookies": {
+        "description": "微博 Cookies",
+        "type": "text",
+        "default": "",
+        "hint": "选填，用于访问需要登录的微博。"
+      },
+      "xiaoheihe_cookies": {
+        "description": "小黑盒 Cookies",
+        "type": "text",
+        "default": "",
+        "hint": "选填，用于访问需要登录的帖子。"
+      },
+      "zhihu_cookies": {
+        "description": "知乎 Cookies",
+        "type": "text",
+        "default": "",
+        "hint": "选填，部分回答 / 文章需要登录态。"
+      }
+    }
+  }
+}
