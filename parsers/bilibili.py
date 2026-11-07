@@ -659,9 +659,16 @@ class BilibiliParser(BaseParser):
         try:
             message_obj = getattr(event, "message_obj", None)
             raw = getattr(message_obj, "raw_message", None)
-            url = self._extract_from_raw_message(raw)
+            if isinstance(raw, dict) and "reply" in raw:
+                raw_filtered = {k: v for k, v in raw.items() if k != "reply"}
+                url = self._extract_from_raw_message(raw_filtered)
+            else:
+                url = self._extract_from_raw_message(raw)
+
             if not url and message_obj is not None:
                 for comp in getattr(message_obj, "message", None) or []:
+                    if getattr(comp, "type", None) in ("reply", "Reply"):
+                        continue
                     inner = getattr(comp, "raw", None) or getattr(comp, "data", None)
                     if inner:
                         url = self._extract_from_raw_message(inner)
@@ -669,9 +676,11 @@ class BilibiliParser(BaseParser):
                             break
             if url:
                 links.append(self._canonical(url))
-            elif QQ_MINI_PROGRAM_RE.search(event.message_str or ""):
-                # 小程序卡片但未解析出链接时，交给解析流程按标题搜索
-                links.append(event.message_str)
+            else:
+                user_text = self.get_user_text(event)
+                if QQ_MINI_PROGRAM_RE.search(user_text):
+                    # 小程序卡片但未解析出链接时，交给解析流程按标题搜索
+                    links.append(user_text)
         except Exception as e:
             logger.debug(f"[哔哩哔哩] 原始消息解析失败：{e}")
         return links

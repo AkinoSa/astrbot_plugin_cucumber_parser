@@ -144,7 +144,8 @@ class ParserManager:
 
     def collect(self, event) -> list[tuple[BaseParser, str]]:
         """从消息中收集所有待解析的链接（含 QQ 小程序卡片）。"""
-        text = BaseParser.clean_message_text(event.message_str or "")
+        user_text = BaseParser.get_user_text(event)
+        text = BaseParser.clean_message_text(user_text)
         jobs: list[tuple[BaseParser, str]] = []
         seen: set[str] = set()
 

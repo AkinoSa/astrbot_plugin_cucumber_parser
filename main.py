@@ -13,7 +13,7 @@ import re
     "astrbot_plugin_cucumber_parser",
     "AkinoSa",
     "黄瓜解析器：自动识别抖音、B 站、小红书、贴吧、微博、微信、小黑盒、知乎链接并解析发送",
-    "1.0.0",
+    "1.0.1",
 )
 class ResolveLitePlugin(Star):
     def __init__(self, context: Context, config: dict):

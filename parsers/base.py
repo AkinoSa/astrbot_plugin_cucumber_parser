@@ -13,6 +13,7 @@ from urllib.parse import urlparse
 
 import aiohttp
 from astrbot.api import logger
+from astrbot.api.message_components import Plain, Reply
 
 try:
     import pillow_heif
@@ -106,18 +107,52 @@ class BaseParser(ABC):
         )
         return value
 
+    @staticmethod
+    def strip_quote_patterns(text: str) -> str:
+        """从字符串中移除常见的引用消息前缀/块。"""
+        if not text:
+            return ''
+        val = re.sub(r"^\[引用消息\([\s\S]*?\)\]\s*", '', text)
+        val = re.sub(r"^\[引用\s*>>>[\s\S]*?\]\s*", '', val)
+        val = re.sub(r"\[CQ:reply,[^\]]+\]\s*", '', val)
+        return val
+
     @classmethod
-    def _collect_raw_urls(cls, value) -> list[str]:
-        """递归从 dict / list / str 中收集所有 http(s) 链接。"""
+    def get_user_text(cls, event) -> str:
+        """提取用户实际发送的纯文本内容，排除引用回复（Reply）组件。"""
+        message_obj = getattr(event, 'message_obj', None)
+        messages = getattr(message_obj, 'message', None) if message_obj else None
+        if messages:
+            plain_parts = []
+            for comp in messages:
+                if isinstance(comp, Reply) or getattr(comp, 'type', None) in ('reply', 'Reply'):
+                    continue
+                if isinstance(comp, Plain):
+                    plain_parts.append(comp.text)
+                elif hasattr(comp, 'text') and isinstance(comp.text, str):
+                    plain_parts.append(comp.text)
+            if plain_parts:
+                return ''.join(plain_parts)
+        return cls.strip_quote_patterns(getattr(event, 'message_str', None) or '')
+
+    @classmethod
+    def _collect_raw_urls(cls, value, ignore_keys: set[str] | None = None) -> list[str]:
+        """递归从 dict / list / str 中收集所有 http(s) 链接（忽略引用回复与来源消息）。"""
+        if ignore_keys is None:
+            ignore_keys = {'reply', 'source'}
         urls: list[str] = []
         if isinstance(value, str):
             urls.extend(cls.URL_IN_JSON_RE.findall(cls.clean_message_text(value)))
         elif isinstance(value, dict):
-            for item in value.values():
-                urls.extend(cls._collect_raw_urls(item))
+            if value.get('type') in ('reply', 'Reply'):
+                return urls
+            for k, item in value.items():
+                if k in ignore_keys:
+                    continue
+                urls.extend(cls._collect_raw_urls(item, ignore_keys=ignore_keys))
         elif isinstance(value, (list, tuple)):
             for item in value:
-                urls.extend(cls._collect_raw_urls(item))
+                urls.extend(cls._collect_raw_urls(item, ignore_keys=ignore_keys))
         return urls
 
     @classmethod
@@ -137,15 +172,20 @@ class BaseParser(ABC):
         if message_obj is not None:
             candidates += self._collect_raw_urls(getattr(message_obj, 'raw_message', None))
             for comp in getattr(message_obj, 'message', None) or []:
+                if isinstance(comp, Reply) or getattr(comp, 'type', None) in ('reply', 'Reply'):
+                    continue
                 inner = getattr(comp, 'raw', None)
                 if inner is None:
                     inner = getattr(comp, 'data', None)
                 candidates += self._collect_raw_urls(inner)
-        candidates += self._collect_raw_urls(getattr(event, 'message_str', None))
+
+        user_text = self.get_user_text(event)
+        if user_text:
+            candidates += self._collect_raw_urls(user_text)
 
         result: list[str] = []
         for url in candidates:
-            url = url.rstrip('.,;，。；、')
+            url = url.rstrip('.,;，。；、）)】]')
             if url and self._match_host(url):
                 result.append(url)
         return list(dict.fromkeys(result))

@@ -46,9 +46,9 @@ class RedbookParser(BaseParser):
     def extract_links(self, text: str) -> list[str]:
         if not text:
             return []
-        links = [m.group(0) for m in self.NOTE_RE.finditer(text)]
-        links += [m.group(0) for m in self.SHORT_RE.finditer(text)]
-        return list(dict.fromkeys(links))
+        links = [m.group(0).rstrip("，。；、）)】]") for m in self.NOTE_RE.finditer(text)]
+        links += [m.group(0).rstrip("，。；、）)】]") for m in self.SHORT_RE.finditer(text)]
+        return list(dict.fromkeys(link for link in links if link))
 
     @staticmethod
     def _extract_initial_state(html: str) -> dict | None:
