@@ -3,7 +3,7 @@ display_name: 黄瓜解析器
 desc: 自动识别抖音、B 站、小红书、贴吧、微博、微信、小黑盒、知乎链接并解析发送
 short_desc: 多平台链接解析（抖音 / B 站 / 小红书 / 贴吧 / 微博 / 微信 / 小黑盒 / 知乎）
 help: 自动识别并解析多平台链接，统一输出标题、作者、发布时间、互动数据、链接与正文；平台没有的数据类别自动省略。
-version: v1.0.1
+version: v1.0.2
 author: AkinoSa
 repo: https://github.com/AkinoSa/astrbot_plugin_cucumber_parser
 support_platforms:
